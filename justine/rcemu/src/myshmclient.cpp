@@ -352,10 +352,10 @@ void justine::sampleclient::MyShmClient::start10 ( boost::asio::io_service& io_s
 	car ( socket, (*i).id, &((*i).from), &((*i).to), &((*i).step) ); //lekérdezzük a mostani gangcopnak a cuccát
 	for(std::vector<Gangster>::iterator j=gngstrs.begin();j!=gngstrs.end();j++) //gengsztereken végigmegyünk
 	{
-	rendezes.push_back(Par{*i,*j}); //Descartes-szorzat
+	  rendezes.push_back(Par{*i,*j,dst((*i).to,(*j).to) < dst((*i).from,(*j).to) ? dst((*i).to,(*j).to) : dst((*i).from,(*j).to)}); //Descartes-szorzat
 	}
       }
-      std::sort(rendezes.begin(),rendezes.end(),[&] (const Par bla1,const Par bla2) {return dst(bla1.zsaru.to,bla1.bunozo.to)<dst(bla2.zsaru.to,bla2.bunozo.to);});
+      std::sort(rendezes.begin(),rendezes.end(),[&] (const Par bla1,const Par bla2) {return bla1.distance<bla2.distance;});
       for(std::vector<Par>::iterator i=rendezes.begin();i!=rendezes.end();i++)
       {
 	std::vector<Par>::iterator torlo=i+1;
@@ -390,10 +390,9 @@ void justine::sampleclient::MyShmClient::start10 ( boost::asio::io_service& io_s
 	car ( socket, (*i).id, &((*i).from), &((*i).to), &((*i).step) ); //lekérdezzük a mostani gangcopnak a cuccát
 	for(std::vector<Gangster>::iterator j=gngstrs.begin();j!=gngstrs.end();j++) //gengsztereken végigmegyünk
 	{
-	rendezes.push_back(Par{*i,*j}); //Descartes-szorzat
-	}
+	   rendezes.push_back(Par{*i,*j,(dst((*i).to,(*j).to) < dst((*i).from,(*j).to) ? dst((*i).to,(*j).to) : dst((*i).from,(*j).to))});}
       }
-      std::sort(rendezes.begin(),rendezes.end(),[&] (const Par bla1,const Par bla2) {return dst(bla1.zsaru.to,bla1.bunozo.to)<dst(bla2.zsaru.to,bla2.bunozo.to);});
+      std::sort(rendezes.begin(),rendezes.end(),[&] (const Par bla1,const Par bla2) {return bla1.distance<bla2.distance;});
       for(std::vector<Par>::iterator i=rendezes.begin();i!=rendezes.end();i++)
       {
 	std::vector<Par>::iterator torlo=i+1;
@@ -421,7 +420,7 @@ void justine::sampleclient::MyShmClient::start10 ( boost::asio::io_service& io_s
       unsigned segedto;
       for (std::vector<Gangster>::iterator zsernyak=gangcop.begin();zsernyak!=gangcop.end();zsernyak++)
 	{
-	  if(std::find_if(rendezes.begin(),rendezes.end(), [&] (const Par bla) {return bla.zsaru.id==(*zsernyak).id;})==rendezes.end()) //zsernyákunk nem mozdul
+	  if(std::find_if(rendezes.begin(),rendezes.end(), [&] (const Par bla) {return bla.zsaru.id==(*zsernyak).id;})==rendezes.end()) //zsernyákunk nem mozdul "zsernyákunknak nincs rendezésbeli párja"
 	  {
 	    segedto=gngstrs[0].to; //a t-t most a gengszter to-jára használjuk (nem kell új változót létrehoznunk)
 	   for(std::vector<Gangster>::iterator i=gngstrs.begin()+1;i!=gngstrs.end();i++)
